@@ -19,17 +19,32 @@
             <div class="bottom"><img src="../assets/imgs/bulletin@2x.png" alt=""><span>{{data.bulletin}}</span></div>
             </div>
         </div>
-        <div class="router-link-div">
-            <router-link to='/goods'>商品</router-link>
-            <router-link to='/evaluation'>评价</router-link>
+        <div class="router-link-div">   
+            <router-link to='/goods'>商品</router-link>                  
+            <router-link to='/evaluation'>评价</router-link>   
             <router-link to='/business'>商家</router-link>
         </div>
         <router-view></router-view>
 
+        <transition  name="slide-fade">
+            <div v-show="shopcarShow" class="shopcar-board">
+                <div v-for="shopCarGood in shopCarGoods" :key="shopCarGood.name">
+                    <div class="flex">
+                        <img :src="shopCarGood.image" alt="">
+                        <span>{{shopCarGood.name}}</span>
+                        <!-- <button v-show="shopCarGood.num>0">-</button> -->
+                        <span>{{shopCarGood.num}}</span>
+                        <!-- <button>+</button> -->
+                        <span>￥{{shopCarGood.num*shopCarGood.price}}</span>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
         <div class="shopCar-bar flex">
-            <div class="left">
+            <div class="left" @click="shopcarShow = !shopcarShow">
                 <img src="../assets/imgs/shopcar.png" alt="">
-                <span>￥0</span>
+                <span>￥{{allMoney}}</span>
                 <span>另需配送费{{data.deliveryPrice}}元</span>
             </div>
             <div class="right">
@@ -45,14 +60,30 @@ import {getSeller} from '../api/apis'
     export default {
         data(){
             return {
-                data:{}
+                data:[],
+                shopcarShow:false,
+                theme1: 'light'
             }
         },
         created(){
             getSeller().then((res)=>{
-                this.data=res.data.data;
-                // console.log(this.data);
-            })
+               this.data=res.data.data
+            });
+        },
+        computed:{
+            goodslist(){
+                return this.$store.state.goodslist
+            },
+            shopCarGoods(){
+                // this.shopCarGoods
+                return this.$store.getters.getGoods
+            },
+            allMoney(){
+                var sum=0;
+                this.$store.getters.getGoods.map(obj => obj.num*obj.price).forEach(v => sum+=v);
+                return sum;
+            }
+            
         }
     }
 </script>
@@ -65,7 +96,6 @@ import {getSeller} from '../api/apis'
 .header{
     height: 180px;
     overflow: hidden;
-    // background-size: 
     .bgd{
         overflow: hidden;
         background-color: rgba(69,70,74,0.8);
@@ -136,9 +166,9 @@ img{
 .router-link-div{
     display: flex;
     justify-content: space-around;
-    height: 60px;
+    height: 50px;
     font-size: 20px;
-    line-height: 60px;
+    line-height: 50px;
     border-bottom: 1px solid #e5e6e8;
     a{ 
         color: #4d545a;
@@ -184,6 +214,35 @@ img{
             line-height: 50px;
         }
     }
+}
+.shopcar-board{
+  position: fixed;  
+  height: 200px;
+  width: 100%;
+  bottom: 60px;
+  background-color:#fffeff;;
+  overflow-y: scroll;
+  div{
+      padding: 10px;
+      font-size: 16px;
+      line-height: 80px;
+      color: red;
+      img{
+          width: 80px;
+          height: 80px;
+      }
+  }
+}
+.slide-fade-enter-active {
+  transition: all .4s ease;
+}
+.slide-fade-leave-active {
+  transition: all .4s ease;
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active for below version 2.1.8 */ {
+  transform: translateY(200px);
+  opacity: 0;
 }
 
 </style>

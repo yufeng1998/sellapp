@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 let req = axios.create({
-    baseURL:'http://localhost:3000',
+    baseURL:'http://192.168.1.4:3000',
     settimeout: 1000
 })
 

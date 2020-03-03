@@ -7,8 +7,12 @@
                 <p>高于周边商家69.2%</p>
             </div>
             <div class="right">
-                <p>服务态度<Rate disabled :value.sync="valueDisabled"></Rate><span>3.9</span></p>
-                <p>味道好坏<Rate disabled :value.sync="valueDisabled"></Rate><span>4.0</span></p>
+                <p>服务态度<Rate disabled show-text :value.sync="valueCustomText">
+                    <span style="color: #f5a623">{{ valueCustomText}}</span></Rate>
+                </p>
+                <p>味道好坏<Rate disabled show-text :value.sync="valueCustomText2">
+                    <span style="color: #f5a623">{{ valueCustomText2}}</span></Rate>
+                </p>
                 <p>送达时间 <span>44分钟</span></p>
             </div>
         </div>
@@ -44,6 +48,7 @@
 
 <script>
 import {getRatings} from '../api/apis.js'
+import BScroll from 'better-scroll'
     export default {
         data(){
             return {
@@ -51,7 +56,8 @@ import {getRatings} from '../api/apis.js'
                 valueDisabled: 4,
                 single: false,
                 valueDisabled2: 4,
-                // valueDisabled2: this.data.score,
+                valueCustomText: 3.8,
+                valueCustomText2: 4.0,
             }
         },
         created(){
@@ -59,6 +65,9 @@ import {getRatings} from '../api/apis.js'
                 this.data=res.data.data;
                 // console.log(this.data);
             })
+        },
+        mounted(){
+            new BScroll(document.getElementsByClassName('evaluation'))
         }
         
     }
@@ -75,12 +84,14 @@ import {getRatings} from '../api/apis.js'
 }
 .evaluation{
     background: #F4F5F7;
+    height: 460px;
+    overflow-y: scroll;
     .top{
-        height: 140px;
+        height: 120px;
         border-bottom: 1px solid #e5e6e8;
         margin-bottom: 20px;
         background: #fff;
-        padding: 20px;
+        padding: 10px;
         .left{
             font-size: 12px;
             // width: 150px;

@@ -3,7 +3,7 @@
         <div class="left left-div">
             <ul class="content">
                     
-                <div @click="selected(index)"  :class="{leftGoods: true,active:index==curIndex}" v-for="(type,index) in data" :key="type.id">
+                <div @click="selected(index)"  :class="{leftGoods: true,active:index==curIndex}" v-for="(type,index) in goodslist" :key="type.id">
                     <p><img v-show="type.type==2" src="../assets/imgs/special_3@2x.png" alt="">{{type.name}}</p>
                 </div>
             </ul>
@@ -11,16 +11,24 @@
 
         <div class="right right-div">
             <ul class="content">
-                    <div :id="index" v-for="(list,index) in data" :key="list.id">
+                    <div :id="index" v-for="(list,index) in goodslist" :key="list.id">
                         <p class="title">{{list.name}}</p>
-                        <div v-for="food in list.foods" :key="food.id">
+                        <div v-for="(food,i) in list.foods" :key="food.id">
                             <div class="list flex">
                                 <div class="list_left"><img :src="food.image" alt=""></div>
                                 <div class="list_right">
                                     <p>{{food.name}}</p>
                                     <p>{{food.description}}</p>
                                     <p><span>月售1132份</span>&emsp;<span>好评率100%</span></p>
-                                    <p><span>￥{{food.price}}</span>&emsp;<span>￥{{food.oldPrice}}</span></p>
+                                    <div class="flex">
+                                        <span>￥{{food.price}}</span>
+                                        <span v-show="food.oldPrice!=''">￥{{food.oldPrice}}</span>
+                                        <p  class="flex">
+                                            <button v-show="food.num>0" @click="reduce(index,i)">-</button>
+                                            <span class="num" v-show="food.num>0">{{food.num}}</span>
+                                            <button @click="add(index,i)">+</button>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -37,26 +45,59 @@ import BScroll from 'better-scroll'
     export default {
         data(){
             return {
-                data:[],
                 curIndex:0,
             }
         },
         created(){
             getGoods().then((res)=>{
-                this.data=res.data.data;
-                // console.log(this.data);
-            })
+               this.$store.commit('initGoodsList',res.data.data)
+            });
         },
          mounted() {
             new BScroll(document.querySelector(".left-div"), {
-            click: true //允许容器进行点击
+            click: true,
             }); 
-            this.rightDiv = new BScroll(document.querySelector(".right-div"));
+            this.rightDiv = new BScroll(document.querySelector(".right-div"),
+            {probeType:3}
+            );
+            this.rightDiv.on('scroll',({y})=>{
+                var _y=Math.abs(y);
+                // console.log(_y)
+                for(var divObj of this.getHeight){     
+                    if(_y>=divObj.min && _y<divObj.max){
+                        this.curIndex=divObj.index;
+                        return
+                    }
+                }
+            });
         },
         methods: {
             selected(index) {
                 this.curIndex = index;
                 this.rightDiv.scrollToElement(document.getElementById(index), 600); //用实例对象.要调用的函数
+            },
+            reduce(index,i){
+                this.$store.commit('reduceNum',{index,i})
+            },
+            add(index,i){
+                this.$store.commit('addNum',{index,i})
+            }
+        },
+        computed:{
+            getHeight(){
+                let arr=[];
+                let total=0;
+
+                for(var i=0;i<this.goodslist.length;i++){
+                    var curHeight=document.getElementById(i).offsetHeight;
+                    arr.push({min:total,max:total+curHeight,index:i});
+
+                    total += curHeight;
+                }
+                return arr;
+            },
+            goodslist(){
+                return this.$store.state.goodslist
             }
         } 
     }
@@ -66,6 +107,9 @@ import BScroll from 'better-scroll'
 *{
     margin: 0;
     padding: 0;
+}
+img{
+    vertical-align: middle;
 }
 .active{
     background: #fff;
@@ -121,7 +165,7 @@ import BScroll from 'better-scroll'
             .list_right{
                 flex: 1;
                 color: #94979c;
-                font-size: 14px;
+                font-size: 12px;
                 p:nth-child(1){
                     color: #0c101b;
                     font-size: 16px;
@@ -137,17 +181,37 @@ import BScroll from 'better-scroll'
                 //     color: #0c101b;
                 //     font-size: 14px;
                 // }
-                p:nth-child(4){
-                    span:nth-child(1){
+                div:nth-child(4){
+                    span:nth-of-type(1){
                         color: #f91320;
                         font-size: 16px;
                         font-weight: bold;
                         margin-right: 10px;
                     }
-                    span:nth-child(2){
+                    span:nth-of-type(2){
                         font-size: 12px;
                         font-weight: bold;
                         text-decoration: line-through;
+                    }
+                    p{
+                        width: 60px;
+                        .num{
+                            font-size: 12px;
+                            font-weight: bold;
+                            color: #94979c;
+                            text-align: center;
+                            margin: 0;
+                            line-height: 20px;
+                        }
+                        button{
+                            width: 20px;
+                            height: 20px;
+                            border-radius: 10px;
+                            background: #069ED8;
+                            color: #fff;
+                            border: none;
+                            line-height: 20px;
+                        }
                     }
                 }
             }
