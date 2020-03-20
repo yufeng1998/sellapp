@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div>
         <div class="header" :style="{backgroundImage: 'url('+data.avatar+')',backgroundRepeat: 'no-repeat',backgroundSize:'100% 220px'}">
             <div class="bgd">

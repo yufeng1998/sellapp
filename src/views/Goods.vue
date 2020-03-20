@@ -13,7 +13,7 @@
             <ul class="content">
                     <div :id="index" v-for="(list,index) in goodslist" :key="list.id">
                         <p class="title">{{list.name}}</p>
-                        <div v-for="(food,i) in list.foods" :key="food.id">
+                        <div v-for="food in list.foods" :key="food.id">
                             <div class="list flex">
                                 <div class="list_left"><img :src="food.image" alt=""></div>
                                 <div class="list_right">
@@ -24,9 +24,9 @@
                                         <span>￥{{food.price}}</span>
                                         <span v-show="food.oldPrice!=''">￥{{food.oldPrice}}</span>
                                         <p  class="flex">
-                                            <button v-show="food.num>0" @click="reduce(index,i)">-</button>
+                                            <button v-show="food.num>0" @click="changeNum(food.name,-1)">-</button>
                                             <span class="num" v-show="food.num>0">{{food.num}}</span>
-                                            <button @click="add(index,i)">+</button>
+                                            <button @click="changeNum(food.name,1)">+</button>
                                         </p>
                                     </div>
                                 </div>
@@ -76,12 +76,9 @@ import BScroll from 'better-scroll'
                 this.curIndex = index;
                 this.rightDiv.scrollToElement(document.getElementById(index), 600); //用实例对象.要调用的函数
             },
-            reduce(index,i){
-                this.$store.commit('reduceNum',{index,i})
+            changeNum(name,val){
+                this.$store.commit('changeNum',{name,val})
             },
-            add(index,i){
-                this.$store.commit('addNum',{index,i})
-            }
         },
         computed:{
             getHeight(){
